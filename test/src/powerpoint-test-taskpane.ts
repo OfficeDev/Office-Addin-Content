@@ -1,5 +1,5 @@
 import { pingTestServer, sendTestResults } from "office-addin-test-helpers";
-import { run } from "../../src/taskpane/powerpoint";
+import { run } from "../../src/content/powerpoint";
 import * as testHelpers from "./test-helpers";
 const port: number = 4201;
 let testValues: any = [];
@@ -26,7 +26,7 @@ async function getSelectedText(): Promise<string> {
 }
 
 export async function runTest(): Promise<void> {
-    // Execute taskpane code
+    // Execute code
     await run();
 
     // get selected text

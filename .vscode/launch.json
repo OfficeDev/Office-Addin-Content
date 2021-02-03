@@ -40,7 +40,7 @@
       "name": "Excel Desktop (Edge Legacy)",
       "type": "office-addin",
       "request": "attach",
-      "url": "https://localhost:3000/taskpane.html?_host_Info=Excel$Win32$16.01$en-US$$$$0",
+      "url": "https://localhost:3000/content.html?_host_Info=Excel$Win32$16.01$en-US$$$$0",
       "port": 9222,
       "timeout": 600000,
       "webRoot": "${workspaceRoot}",
@@ -62,33 +62,11 @@
       "name": "PowerPoint Desktop (Edge Legacy)",
       "type": "office-addin",
       "request": "attach",
-      "url": "https://localhost:3000/taskpane.html?_host_Info=PowerPoint$Win32$16.01$en-US$$$$0",
+      "url": "https://localhost:3000/content.html?_host_Info=PowerPoint$Win32$16.01$en-US$$$$0",
       "port": 9222,
       "timeout": 600000,
       "webRoot": "${workspaceRoot}",
       "preLaunchTask": "Debug: PowerPoint Desktop",
-      "postDebugTask": "Stop Debug"
-    },
-    {
-      "name": "Word Desktop (Edge Chromium)",
-      "type": "edge",
-      "request": "attach",
-      "useWebView": "advanced",
-      "port": 9229,
-      "timeout": 600000,
-      "webRoot": "${workspaceRoot}",
-      "preLaunchTask": "Debug: Word Desktop",
-      "postDebugTask": "Stop Debug"
-    },
-    {
-      "name": "Word Desktop (Edge Legacy)",
-      "type": "office-addin",
-      "request": "attach",
-      "url": "https://localhost:3000/taskpane.html?_host_Info=Word$Win32$16.01$en-US$$$$0",
-      "port": 9222,
-      "timeout": 600000,
-      "webRoot": "${workspaceRoot}",
-      "preLaunchTask": "Debug: Word Desktop",
       "postDebugTask": "Stop Debug"
     },
     {

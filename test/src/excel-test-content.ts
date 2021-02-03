@@ -17,7 +17,7 @@ export async function runTest(): Promise<void> {
     await run();
     await testHelpers.sleep(2000);
 
-    // Get output of executed taskpane code
+    // Get output of executed add-in code
     return Excel.run(async context => {
         const range = context.workbook.getSelectedRange();
         const cellFill = range.format.fill;

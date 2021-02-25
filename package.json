@@ -1,9 +1,9 @@
 {
-  "name": "office-addin-taskpane",
+  "name": "office-addin-content",
   "version": "0.0.1",
   "repository": {
     "type": "git",
-    "url": "https://github.com/OfficeDev/Office-Addin-TaskPane.git"
+    "url": "https://github.com/OfficeDev/Office-Addin-Content.git"
   },
   "license": "MIT",
   "config": {
@@ -42,8 +42,8 @@
     "clean-webpack-plugin": "^3.0.0",
     "copy-webpack-plugin": "^6.1.1",
     "eslint-config-office-addins": "^1.0.19",
-    "find-process": "^1.4.3",
     "file-loader": "^4.2.0",
+    "find-process": "^1.4.3",
     "html-loader": "^0.5.5",
     "html-webpack-plugin": "^4.5.0",
     "mocha": "^8.1.3",

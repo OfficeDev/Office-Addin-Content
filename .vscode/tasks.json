@@ -61,7 +61,7 @@
     {
       "label": "Debug: Web",
       "type": "npm",
-      "script": "start:web",
+      "script": "start:web -- --document ${input:officeOnlineDocumentUrl}",
       "presentation": {
         "clear": true,
         "panel": "shared",
@@ -77,10 +77,7 @@
         "clear": true,
         "panel": "dedicated"
       },
-      "problemMatcher": [],
-      "runOptions": {
-        "runOn": "folderOpen"
-      }
+      "problemMatcher": []
     },
     {
       "label": "Install",
@@ -130,5 +127,12 @@
       },
       "problemMatcher": []
     },
+  ],
+  "inputs": [
+    {
+      "id": "officeOnlineDocumentUrl",
+      "type": "promptString",
+      "description": "Please enter the url for the Office Online document."
+    }
   ]
 }

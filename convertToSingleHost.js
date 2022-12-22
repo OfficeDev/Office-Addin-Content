@@ -1,11 +1,20 @@
+/* global require, process, console */
+
 const convertTest = process.argv[3] === "convert-test";
 const fs = require("fs");
 const host = process.argv[2];
 const hosts = ["excel", "powerpoint"];
 const path = require("path");
 const util = require("util");
-const testPackages = ["@types/mocha", "@types/node", "current-processes", "mocha", "office-addin-test-helpers",
-  "office-addin-test-server", "ts-node"];
+const testPackages = [
+  "@types/mocha",
+  "@types/node",
+  "current-processes",
+  "mocha",
+  "office-addin-test-helpers",
+  "office-addin-test-server",
+  "ts-node",
+];
 const readFileAsync = util.promisify(fs.readFile);
 const unlinkFileAsync = util.promisify(fs.unlink);
 const writeFileAsync = util.promisify(fs.writeFile);
@@ -36,9 +45,12 @@ async function convertProjectToSingleHost(host) {
   // delete all test files by default for now - eventually we want to convert the tests by default
   if (convertTest && (host === "excel" || host === "word")) {
     // copy over host-specific content test code to test-content.ts
-    const testContent = await readFileAsync(`./test/src/${host}-test-content.ts`, "utf8");
-    const updatedTestContent = testContentContent.replace(`../../src/content/${host}`, `../../src/content/content`);
-    await writeFileAsync(`./test/src/test-content.ts`, updatedTestContent);
+    const testTaskpaneContent = await readFileAsync(`./test/src/${host}-test-content.ts`, "utf8");
+    const updatedTestTaskpaneContent = testTaskpaneContent.replace(
+      `../../src/content/${host}`,
+      `../../src/content/content`
+    );
+    await writeFileAsync(`./test/src/test-content.ts`, updatedTestTaskpaneContent);
 
     // update ui-test.ts to only run against specified host
     const testContent = await readFileAsync(`./test/ui-test.ts`, "utf8");
@@ -51,8 +63,7 @@ async function convertProjectToSingleHost(host) {
         await unlinkFileAsync(`./test/src/${host}-test-content.ts`);
       }
     });
-  }
-  else {
+  } else {
     deleteFolder(path.resolve(`./test`));
   }
 
@@ -65,6 +76,9 @@ async function convertProjectToSingleHost(host) {
   // delete the .github folder
   deleteFolder(path.resolve(`./.github`));
 
+  // delete CI/CD pipeline files
+  deleteFolder(path.resolve(`./.azure-devops`));
+
   // delete repo support files
   await deleteSupportFiles();
 }
@@ -76,19 +90,19 @@ async function updatePackageJsonForSingleHost(host) {
   let content = JSON.parse(data);
 
   // update 'config' section in package.json to use selected host
-  content.config["app-to-debug"] = host;
+  content.config["app_to_debug"] = host;
+
+  // remove 'engines' section
+  delete content.engines;
 
   // update sideload and unload scripts to use selected host.
-  ["sideload", "unload"].forEach(key => {
+  ["sideload", "unload"].forEach((key) => {
     content.scripts[key] = content.scripts[`${key}:${host}`];
   });
 
   // remove scripts that are unrelated to the selected host
   Object.keys(content.scripts).forEach(function (key) {
-    if (key.startsWith("sideload:")
-      || key.startsWith("unload:")
-      || key === "convert-to-single-host"
-    ) {
+    if (key.startsWith("sideload:") || key.startsWith("unload:") || key === "convert-to-single-host") {
       delete content.scripts[key];
     }
   });
@@ -104,7 +118,7 @@ async function updatePackageJsonForSingleHost(host) {
     // remove test-related packages
     Object.keys(content.devDependencies).forEach(function (key) {
       if (testPackages.includes(key)) {
-        delete content.devDependencies[key]
+        delete content.devDependencies[key];
       }
     });
   }
@@ -125,13 +139,12 @@ async function updateLaunchJsonFile() {
 function deleteFolder(folder) {
   try {
     if (fs.existsSync(folder)) {
-      fs.readdirSync(folder).forEach(function (file, index) {
+      fs.readdirSync(folder).forEach(function (file) {
         const curPath = `${folder}/${file}`;
 
         if (fs.lstatSync(curPath).isDirectory()) {
           deleteFolder(curPath);
-        }
-        else {
+        } else {
           fs.unlinkSync(curPath);
         }
       });
@@ -142,19 +155,19 @@ function deleteFolder(folder) {
   }
 }
 
-async function deleteSupportFiles()
-{
-    await unlinkFileAsync("CONTRIBUTING.md");
-    await unlinkFileAsync(".gitignore");
-    await unlinkFileAsync("LICENSE");
-    await unlinkFileAsync("README.md");
-    await unlinkFileAsync("./convertToSingleHost.js");
+async function deleteSupportFiles() {
+  await unlinkFileAsync("CONTRIBUTING.md");
+  await unlinkFileAsync(".gitignore");
+  await unlinkFileAsync("LICENSE");
+  await unlinkFileAsync("README.md");
+  await unlinkFileAsync("./convertToSingleHost.js");
 }
+
 /**
  * Modify the project so that it only supports a single host.
  * @param host The host to support.
  */
-modifyProjectForSingleHost(host).catch(err => {
+modifyProjectForSingleHost(host).catch((err) => {
   console.error(`Error: ${err instanceof Error ? err.message : err}`);
   process.exitCode = 1;
 });

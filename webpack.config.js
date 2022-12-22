@@ -1,87 +1,93 @@
+/* eslint-disable no-undef */
+
 const devCerts = require("office-addin-dev-certs");
-const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const fs = require("fs");
-const webpack = require("webpack");
 
-const urlDev="https://localhost:3000/";
-const urlProd="https://www.contoso.com/"; // CHANGE THIS TO YOUR PRODUCTION DEPLOYMENT LOCATION
+const urlDev = "https://localhost:3000/";
+const urlProd = "https://www.contoso.com/"; // CHANGE THIS TO YOUR PRODUCTION DEPLOYMENT LOCATION
+
+async function getHttpsOptions() {
+  const httpsOptions = await devCerts.getHttpsServerOptions();
+  return { ca: httpsOptions.ca, key: httpsOptions.key, cert: httpsOptions.cert };
+}
 
 module.exports = async (env, options) => {
   const dev = options.mode === "development";
-  const buildType = dev ? "dev" : "prod";
   const config = {
     devtool: "source-map",
     entry: {
-      polyfill: "@babel/polyfill",
+      polyfill: ["core-js/stable", "regenerator-runtime/runtime"],
       content: "./src/content/content.ts",
     },
+    output: {
+      clean: true,
+    },
     resolve: {
-      extensions: [".ts", ".tsx", ".html", ".js"]
+      extensions: [".ts", ".tsx", ".html", ".js"],
     },
     module: {
       rules: [
         {
           test: /\.ts$/,
           exclude: /node_modules/,
-          use: "babel-loader"
-        },
-        {
-          test: /\.tsx?$/,
-          exclude: /node_modules/,
-          use: "ts-loader"
+          use: {
+            loader: "babel-loader",
+            options: {
+              presets: ["@babel/preset-typescript"],
+            },
+          },
         },
         {
           test: /\.html$/,
           exclude: /node_modules/,
-          use: "html-loader"
+          use: "html-loader",
         },
         {
-          test: /\.(png|jpg|jpeg|gif)$/,
-          loader: "file-loader",
-          options: {
-            name: '[path][name].[ext]',          
-          }
-        }
-      ]
+          test: /\.(png|jpg|jpeg|gif|ico)$/,
+          type: "asset/resource",
+          generator: {
+            filename: "assets/[name][ext][query]",
+          },
+        },
+      ],
     },
     plugins: [
-      new CleanWebpackPlugin(),
       new HtmlWebpackPlugin({
         filename: "content.html",
         template: "./src/content/content.html",
-        chunks: ["polyfill", "content"]
+        chunks: ["polyfill", "content"],
       }),
       new CopyWebpackPlugin({
         patterns: [
           {
-            to: "content.css",
-            from: "./src/content/content.css"
+            from: "assets/*",
+            to: "assets/[name][ext][query]",
           },
           {
-            to: "manifest." + buildType + ".xml",
-            from: "manifest.xml",
+            from: "manifest*.xml",
+            to: "[name]" + "[ext]",
             transform(content) {
               if (dev) {
                 return content;
               } else {
-                const urlDev = "https://localhost:3000/";
-                const urlProd = "https://akrantz.github.io/office-addins/content/";
                 return content.toString().replace(new RegExp(urlDev, "g"), urlProd);
               }
-            }          
-          }
-        ]
+            },
+          },
+        ],
       }),
     ],
     devServer: {
       headers: {
-        "Access-Control-Allow-Origin": "*"
-      },      
-      https: (options.https !== undefined) ? options.https : await devCerts.getHttpsServerOptions(),
-      port: process.env.npm_package_config_dev_server_port || 3000
-    }
+        "Access-Control-Allow-Origin": "*",
+      },
+      server: {
+        type: "https",
+        options: env.WEBPACK_BUILD || options.https !== undefined ? options.https : await getHttpsOptions(),
+      },
+      port: process.env.npm_package_config_dev_server_port || 3000,
+    },
   };
 
   return config;
